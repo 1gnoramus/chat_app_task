@@ -1,3 +1,5 @@
+import 'package:chat_app_task/screens/chat_screen.dart';
+import 'package:chat_app_task/screens/registration_screen.dart';
 import 'package:flutter/material.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -90,13 +92,21 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   elevation: 5.0,
                   child: MaterialButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.pushNamed(context, ChatScreen.id);
+                    },
                     minWidth: 200.0,
                     height: 42.0,
                     child: const Text('ВОЙТИ'),
                   ),
                 ),
-              )
+              ),
+              GestureDetector(
+                child: Text("Создать аккаунт"),
+                onTap: () {
+                  Navigator.pushNamed(context, RegistrationScreen.id);
+                },
+              ),
             ],
           ),
         ),
