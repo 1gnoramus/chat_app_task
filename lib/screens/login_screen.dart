@@ -1,14 +1,19 @@
 import 'package:chat_app_task/screens/chat_screen.dart';
 import 'package:chat_app_task/screens/registration_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class LoginScreen extends StatefulWidget {
   static String id = 'login_screen';
+
   @override
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  final _auth = FirebaseAuth.instance;
+  late String email;
+  late String password;
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -29,8 +34,11 @@ class _LoginScreenState extends State<LoginScreen> {
                 height: 48.0,
               ),
               TextField(
+                keyboardType: TextInputType.emailAddress,
                 style: TextStyle(color: Colors.black),
-                onChanged: (value) {},
+                onChanged: (value) {
+                  email = value;
+                },
                 decoration: const InputDecoration(
                   hintText: 'Введите Вашу почту',
                   contentPadding: EdgeInsets.symmetric(
@@ -58,7 +66,9 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               TextField(
                 style: TextStyle(color: Colors.black),
-                onChanged: (value) {},
+                onChanged: (value) {
+                  password = value;
+                },
                 decoration: const InputDecoration(
                   hintText: 'Enter your password.',
                   contentPadding:
@@ -92,8 +102,12 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   elevation: 5.0,
                   child: MaterialButton(
-                    onPressed: () {
-                      Navigator.pushNamed(context, ChatScreen.id);
+                    onPressed: () async {
+                      final user = await _auth.signInWithEmailAndPassword(
+                          email: email, password: password);
+                      if (user != null) {
+                        Navigator.pushNamed(context, ChatScreen.id);
+                      }
                     },
                     minWidth: 200.0,
                     height: 42.0,
@@ -103,7 +117,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               GestureDetector(
                 child: Text("Создать аккаунт"),
-                onTap: () {
+                onTap: () async {
                   Navigator.pushNamed(context, RegistrationScreen.id);
                 },
               ),
