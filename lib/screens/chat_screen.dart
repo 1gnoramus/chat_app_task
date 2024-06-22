@@ -10,6 +10,7 @@ class ChatScreen extends StatefulWidget {
 }
 
 class _ChatScreenState extends State<ChatScreen> {
+  final messageTextController = TextEditingController();
   final _auth = FirebaseAuth.instance;
   final _firestore = FirebaseFirestore.instance;
   late User loggedinUser;
@@ -18,6 +19,8 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   void initState() {
     super.initState();
+    messagesStream();
+
     getCurrentUser();
   }
 
@@ -27,13 +30,6 @@ class _ChatScreenState extends State<ChatScreen> {
       loggedinUser = user;
     }
   }
-
-  // void getMessages() async {
-  //   final messages = await _firestore.collection('messages').get();
-  //   for (var message in messages.docs) {
-  //     print(message.data());
-  //   }
-  // }
 
   void messagesStream() async {
     await for (var snapshot in _firestore.collection('messages').snapshots()) {
@@ -47,6 +43,7 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         leading: null,
         title: const Text('Чат'),
@@ -58,18 +55,34 @@ class _ChatScreenState extends State<ChatScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             StreamBuilder(
-              stream: _firestore.collection('messages').snapshots(),
+              stream: _firestore
+                  .collection('messages')
+                  .orderBy('timestamp')
+                  .snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.hasData) {
-                  final messages = snapshot.data?.docs;
-                  List<Text> messageWidgets = [];
+                  final messages = snapshot.data?.docs.reversed;
+                  List<MessagePiece> messageWidgets = [];
                   for (var message in messages!) {
                     final messageText = message.data()['text'];
                     final messageSender = message.data()['sender'];
-                    messageWidgets.add(Text(messageText));
+                    final timestamp = message.data()['timestamp'];
+                    final currentUset = loggedinUser.email;
+
+                    if (currentUset == messageSender) {}
+                    messageWidgets.add(MessagePiece(
+                      messageText: messageText,
+                      isCurrentUser: currentUset == messageSender,
+                      timestamp: timestamp,
+                    ));
                   }
-                  return Column(
-                    children: messageWidgets,
+                  return Expanded(
+                    child: ListView(
+                      reverse: true,
+                      padding: EdgeInsets.symmetric(
+                          horizontal: 10.0, vertical: 12.0),
+                      children: messageWidgets,
+                    ),
                   );
                 } else {
                   return CircularProgressIndicator();
@@ -87,22 +100,27 @@ class _ChatScreenState extends State<ChatScreen> {
                 children: [
                   Expanded(
                     child: TextField(
+                      style: TextStyle(color: Colors.black),
+                      controller: messageTextController,
                       onChanged: (value) {
                         messageText = value;
                       },
                       decoration: const InputDecoration(
                         contentPadding: EdgeInsets.symmetric(
                             vertical: 10.0, horizontal: 20.0),
-                        hintText: 'Type your message here...',
+                        hintText: 'Введите Ваше сообщение',
                         border: InputBorder.none,
                       ),
                     ),
                   ),
                   TextButton(
                     onPressed: () {
-                      _firestore.collection('messages').add(
-                          {'text': messageText, 'sender': loggedinUser.email});
-                      messagesStream();
+                      messageTextController.clear();
+                      _firestore.collection('messages').add({
+                        'text': messageText,
+                        'sender': loggedinUser.email,
+                        'timestamp': Timestamp.now()
+                      });
                     },
                     child: const Text(
                       'Send',
@@ -112,12 +130,71 @@ class _ChatScreenState extends State<ChatScreen> {
                         fontSize: 18.0,
                       ),
                     ),
-                  )
+                  ),
                 ],
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class MessagePiece extends StatelessWidget {
+  const MessagePiece({
+    super.key,
+    required this.messageText,
+    required this.isCurrentUser,
+    required this.timestamp,
+  });
+  final bool isCurrentUser;
+
+  final String messageText;
+  final Timestamp timestamp;
+
+  String formatTimestamp() {
+    DateTime dateTime = timestamp.toDate();
+    int hours = dateTime.hour;
+    int minutes = dateTime.minute;
+
+    String formattedHours = hours.toString().padLeft(2, '0');
+    String formattedMinutes = minutes.toString().padLeft(2, '0');
+
+    return '$formattedHours:$formattedMinutes';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(10.0),
+      child: Row(
+        mainAxisAlignment:
+            isCurrentUser ? MainAxisAlignment.end : MainAxisAlignment.start,
+        children: [
+          Material(
+            borderRadius: isCurrentUser
+                ? BorderRadius.only(
+                    topLeft: Radius.circular(30.0),
+                    bottomLeft: Radius.circular(30.0),
+                    topRight: Radius.circular(30.0))
+                : BorderRadius.only(
+                    topLeft: Radius.circular(30.0),
+                    bottomRight: Radius.circular(30.0),
+                    topRight: Radius.circular(30.0)),
+            elevation: 5.0,
+            color: isCurrentUser ? Colors.green : Colors.grey,
+            child: Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+              child: Text(
+                messageText,
+                style: TextStyle(color: Colors.black),
+              ),
+            ),
+          ),
+          Text(formatTimestamp())
+        ],
       ),
     );
   }
