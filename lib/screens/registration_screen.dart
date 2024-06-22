@@ -37,7 +37,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
             ),
             TextField(
               keyboardType: TextInputType.emailAddress,
-              style: TextStyle(color: Colors.black),
+              style: const TextStyle(color: Colors.black),
               onChanged: (value) {
                 email = value;
               },
@@ -64,7 +64,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
               height: 8.0,
             ),
             TextField(
-              style: TextStyle(color: Colors.black),
+              style: const TextStyle(color: Colors.black),
               onChanged: (value) {
                 password = value;
                 //Do something with the user input.

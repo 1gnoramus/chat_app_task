@@ -34,11 +34,7 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   void messagesStream() async {
-    await for (var snapshot in _firestore.collection('messages').snapshots()) {
-      for (var message in snapshot.docs) {
-        print(message.data());
-      }
-    }
+    await for (var snapshot in _firestore.collection('messages').snapshots()) {}
   }
 
   @override
@@ -47,7 +43,6 @@ class _ChatScreenState extends State<ChatScreen> {
       appBar: AppBar(
         leading: null,
         title: Text('Чат с ${widget.receiver}'),
-        backgroundColor: Colors.redAccent,
       ),
       body: SafeArea(
         child: Column(
@@ -134,7 +129,7 @@ class _ChatScreenState extends State<ChatScreen> {
                       });
                     },
                     child: const Text(
-                      'Send',
+                      'Отправить',
                       style: TextStyle(
                         color: Colors.redAccent,
                         fontWeight: FontWeight.bold,

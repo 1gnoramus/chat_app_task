@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:chat_app_task/screens/chat_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -42,8 +44,11 @@ class _FriendsScreenState extends State<FriendsScreen> {
         title: const Text('Чаты'),
       ),
       body: friendsList != []
-          ? Column(
-              children: friendsList,
+          ? Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Column(
+                children: friendsList,
+              ),
             )
           : CircularProgressIndicator(
               color: Colors.red,
@@ -53,10 +58,12 @@ class _FriendsScreenState extends State<FriendsScreen> {
 }
 
 class FriendInfo extends StatelessWidget {
-  const FriendInfo({
+  FriendInfo({
     super.key,
     required this.user,
   });
+  Random random = Random();
+
   String getFirstLetterUpperCase(String str) {
     if (str.isEmpty) return '';
     return str[0].toUpperCase();
@@ -66,37 +73,50 @@ class FriendInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => ChatScreen(receiver: user.data()['email'])),
-        );
-      },
-      child: Row(
-        children: [
-          Container(
-            decoration: const BoxDecoration(
-                borderRadius: BorderRadius.all(Radius.circular(100.0)),
-                color: Colors.red),
-            height: 60.0,
-            width: 60.0,
-            child: Center(
-                child: Text(
-              getFirstLetterUpperCase(user.data()['email']),
-              style: const TextStyle(color: Colors.white, fontSize: 24.0),
-            )),
+    return Column(
+      children: [
+        GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) =>
+                      ChatScreen(receiver: user.data()['email'])),
+            );
+          },
+          child: Row(
+            children: [
+              Container(
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.all(Radius.circular(100.0)),
+                    color: Color.fromARGB(
+                      255,
+                      random.nextInt(256),
+                      random.nextInt(256),
+                      random.nextInt(256),
+                    )),
+                height: 60.0,
+                width: 60.0,
+                child: Center(
+                    child: Text(
+                  getFirstLetterUpperCase(user.data()['email']),
+                  style: const TextStyle(color: Colors.white, fontSize: 24.0),
+                )),
+              ),
+              const SizedBox(
+                width: 10.0,
+              ),
+              Text(
+                user.data()['email'],
+                style: const TextStyle(color: Colors.black, fontSize: 24.0),
+              ),
+            ],
           ),
-          const SizedBox(
-            width: 10.0,
-          ),
-          Text(
-            user.data()['email'],
-            style: const TextStyle(color: Colors.black, fontSize: 24.0),
-          ),
-        ],
-      ),
+        ),
+        SizedBox(
+          height: 20.0,
+        ),
+      ],
     );
   }
 }
