@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 
 class ChatScreen extends StatefulWidget {
   static String id = 'chat_screen';
+  ChatScreen({required this.receiver});
+  final String receiver;
 
   @override
   State<ChatScreen> createState() => _ChatScreenState();
@@ -37,16 +39,14 @@ class _ChatScreenState extends State<ChatScreen> {
         print(message.data());
       }
     }
-    ;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
       appBar: AppBar(
         leading: null,
-        title: const Text('Чат'),
+        title: Text('Чат с ${widget.receiver}'),
         backgroundColor: Colors.redAccent,
       ),
       body: SafeArea(
@@ -66,15 +66,25 @@ class _ChatScreenState extends State<ChatScreen> {
                   for (var message in messages!) {
                     final messageText = message.data()['text'];
                     final messageSender = message.data()['sender'];
+                    final messageReceiver = message.data()['receiver'];
                     final timestamp = message.data()['timestamp'];
                     final currentUset = loggedinUser.email;
-
-                    if (currentUset == messageSender) {}
-                    messageWidgets.add(MessagePiece(
-                      messageText: messageText,
-                      isCurrentUser: currentUset == messageSender,
-                      timestamp: timestamp,
-                    ));
+                    if (messageReceiver == widget.receiver &&
+                        currentUset == messageSender) {
+                      messageWidgets.add(MessagePiece(
+                        messageText: messageText,
+                        isCurrentUser: currentUset == messageSender,
+                        timestamp: timestamp,
+                      ));
+                    }
+                    if (messageReceiver == currentUset &&
+                        widget.receiver == messageSender) {
+                      messageWidgets.add(MessagePiece(
+                        messageText: messageText,
+                        isCurrentUser: currentUset == messageSender,
+                        timestamp: timestamp,
+                      ));
+                    }
                   }
                   return Expanded(
                     child: ListView(
@@ -119,6 +129,7 @@ class _ChatScreenState extends State<ChatScreen> {
                       _firestore.collection('messages').add({
                         'text': messageText,
                         'sender': loggedinUser.email,
+                        'receiver': widget.receiver,
                         'timestamp': Timestamp.now()
                       });
                     },

@@ -1,5 +1,7 @@
 import 'package:chat_app_task/screens/chat_screen.dart';
+import 'package:chat_app_task/screens/friends_screen.dart';
 import 'package:chat_app_task/screens/login_screen.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -11,6 +13,7 @@ class RegistrationScreen extends StatefulWidget {
 }
 
 class _RegistrationScreenState extends State<RegistrationScreen> {
+  final _firestore = FirebaseFirestore.instance;
   final _auth = FirebaseAuth.instance;
   late String email;
   late String password;
@@ -18,7 +21,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24.0),
         child: Column(
@@ -99,10 +101,11 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                   onPressed: () async {
                     final newUser = await _auth.createUserWithEmailAndPassword(
                         email: email, password: password);
+                    _firestore.collection('users').add({'email': email});
                     // ignore: unnecessary_null_comparison
                     if (newUser != null) {
                       // ignore: use_build_context_synchronously
-                      Navigator.pushNamed(context, ChatScreen.id);
+                      Navigator.pushNamed(context, FriendsScreen.id);
                     }
                   },
                   minWidth: 200.0,

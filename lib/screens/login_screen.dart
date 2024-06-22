@@ -1,4 +1,5 @@
 import 'package:chat_app_task/screens/chat_screen.dart';
+import 'package:chat_app_task/screens/friends_screen.dart';
 import 'package:chat_app_task/screens/registration_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -106,7 +107,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       final user = await _auth.signInWithEmailAndPassword(
                           email: email, password: password);
                       if (user != null) {
-                        Navigator.pushNamed(context, ChatScreen.id);
+                        Navigator.pushNamed(context, FriendsScreen.id);
                       }
                     },
                     minWidth: 200.0,
